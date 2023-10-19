@@ -4,6 +4,10 @@ import java.util.Arrays;
 import java.util.Random;
 import java.util.stream.Stream;
 
+import com.Plotting;
+
+import javafx.stage.Stage;
+
 public class Inicialization {
     public int generations;
     public int population;
@@ -175,11 +179,19 @@ public class Inicialization {
     }
 
     public static void main(String[] args){
-        Inicialization inicialization = Inicialization.setup(1000, 1000, 50, 0.3f, 0.5f);
+        Inicialization inicialization = Inicialization.setup(100, 100, 50, 0.3f, 0.5f);
         inicialization.determineReferenceZ();
         inicialization.evolve(false);
-        System.out.println("Increased gauss: " + inicialization.increasedGauss);
-        System.out.println("Decreased gauss: " + inicialization.decreasedGauss);
+        Float[] xValues = new Float[inicialization.population];
+        Float[] yValues = new Float[inicialization.population];
+        for (int i = 0; i < inicialization.population; i++){
+            xValues[i] = inicialization.chromosomes[i].f1();
+            yValues[i] = inicialization.chromosomes[i].f2();
+        }
+        System.out.println("xValues:" + xValues.length + " yValues:" + yValues.length);
+        Plotting plot = new Plotting(xValues, yValues, "ZDT3");
+        
+
     }
 }
 
