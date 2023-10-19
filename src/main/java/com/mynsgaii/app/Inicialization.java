@@ -14,16 +14,18 @@ public class Inicialization {
     public ChromosomeZDT3[] chromosomes;//cromosomas de la poblacion
     public Subproblema[] subproblemas;
     public Float tau;
+    public int increasedGauss = 0;
+    public int decreasedGauss = 0;
 
     public Float[] referenceZ;
 
-    public Inicialization(int generations, int population, int dimensions, Float neighborhoodSize, Float crossoverRate, Float mutationRate) {
+    public Inicialization(int generations, int population, int dimensions, Float neighborhoodSize, Float crossoverRate) {
         this.generations = generations;
         this.population = population;
         this.dimensions =  dimensions;
         this.neighborhoodSize = neighborhoodSize;
         this.crossoverRate = crossoverRate;
-        this.mutationRate = mutationRate;
+        this.mutationRate = 1f/population;
         this.tau = 1 / (float) Math.sqrt(dimensions);
         this.subproblemas = new Subproblema[population];
     }
@@ -40,8 +42,8 @@ public class Inicialization {
         chromosomes = newChromosomes;
     }
 
-    public static Inicialization setup(int generations, int population, int dimensions, Float neighborhoodSize, Float crossoverRate, Float mutationRate){
-        Inicialization inicialization = new Inicialization(generations, population, dimensions, neighborhoodSize, crossoverRate, mutationRate);
+    public static Inicialization setup(int generations, int population, int dimensions, Float neighborhoodSize, Float crossoverRate){
+        Inicialization inicialization = new Inicialization(generations, population, dimensions, neighborhoodSize, crossoverRate);
         Float jump = 1 / (((float)population) - 1);
         Float counter = 0f;
         for (int i = 0; i < population; i++){
@@ -74,10 +76,10 @@ public class Inicialization {
         for (int i = 0; i < 3; i++){
             threeRandomPicks[i] = (int) (Math.random() * (neighborhood.length));
         }
-        Float randomProduct = (float) Math.random() * 2;Float[] mutatedGenes = new Float[dimensions];
+        Float[] mutatedGenes = new Float[dimensions];
         for (int i = 0; i < dimensions; i++){
             mutatedGenes[i] = clamp(chromosomes[threeRandomPicks[0]].genes[i] + 
-                    randomProduct * (
+                    0.5f * (
                         chromosomes[threeRandomPicks[1]].genes[i] -
                         chromosomes[threeRandomPicks[2]].genes[i]),
                         0, 1);
@@ -124,7 +126,7 @@ public class Inicialization {
                     chromosomes[i] = newChromosome;
                 }
             } 
-            if (Math.random() > this.mutationRate){
+            if (Math.random() <= this.mutationRate){
                 newChromosome = gaussianMutation(i, debug);
                 totalMutations++;
                 if (newChromosome.isBetterThan(chromosomes[i], subproblemas[i].weights, debug)){
@@ -133,16 +135,20 @@ public class Inicialization {
                 }
             }
         }
-        if (positiveMutations/totalMutations < 0.2){
-            for (int i = 0; i < population; i++){
-                for (int j = 0; j < dimensions; j++){
-                    chromosomes[i].gaussValues[j] = chromosomes[i].gaussValues[j] * 0.8f;
+        if (totalMutations > 0){
+            if (positiveMutations/totalMutations < 0.2){
+                for (int i = 0; i < population; i++){
+                    for (int j = 0; j < dimensions; j++){
+                        chromosomes[i].gaussValues[j] = chromosomes[i].gaussValues[j] * 0.8f;
+                    }
+                    decreasedGauss++;
                 }
-            }
-        } else {
-            for (int i = 0; i < population; i++){
-                for (int j = 0; j < dimensions; j++){
-                    chromosomes[i].gaussValues[j] = chromosomes[i].gaussValues[j] * 1.2f;
+            } else {
+                for (int i = 0; i < population; i++){
+                    for (int j = 0; j < dimensions; j++){
+                        chromosomes[i].gaussValues[j] = chromosomes[i].gaussValues[j] * 1.2f;
+                    }
+                    increasedGauss++;
                 }
             }
         }
@@ -169,9 +175,11 @@ public class Inicialization {
     }
 
     public static void main(String[] args){
-        Inicialization inicialization = Inicialization.setup(1000, 100, 5, 0.3f, 0.5f, 0.5f);
+        Inicialization inicialization = Inicialization.setup(1000, 1000, 50, 0.3f, 0.5f);
         inicialization.determineReferenceZ();
-        inicialization.evolve(true);
+        inicialization.evolve(false);
+        System.out.println("Increased gauss: " + inicialization.increasedGauss);
+        System.out.println("Decreased gauss: " + inicialization.decreasedGauss);
     }
 }
 
