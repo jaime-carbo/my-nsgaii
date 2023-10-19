@@ -102,7 +102,7 @@ public class Inicialization {
         Float newGauss;
         Float newGene;
         Random random = new Random();
-        ChromosomeZDT3 newChromosomeZDT3 = new ChromosomeZDT3(chromosomes[index].genes);
+        ChromosomeZDT3 newChromosomeZDT3 = new ChromosomeZDT3(chromosomes[index].genes.clone());
         for (int i = 0; i < dimensions; i++){
             newGauss = chromosomes[index].gaussValues[i] * (float)Math.exp(tau * random.nextGaussian());
             newGene = (float)(chromosomes[index].genes[i] + newGauss * random.nextGaussian());
@@ -114,6 +114,8 @@ public class Inicialization {
 
     public void evolveOnce(boolean debug){
         ChromosomeZDT3 newChromosome;
+        int totalMutations = 0;
+        int positiveMutations = 0;
         for (int i = 0; i < population; i++){
             if (Math.random() > this.crossoverRate){
                 newChromosome = differentialEvolution(i, debug);
@@ -124,14 +126,33 @@ public class Inicialization {
             } 
             if (Math.random() > this.mutationRate){
                 newChromosome = gaussianMutation(i, debug);
-                
+                totalMutations++;
+                if (newChromosome.isBetterThan(chromosomes[i], subproblemas[i].weights, debug)){
+                    positiveMutations++;
+                    if (debug) System.out.println("New chromosome:" + newChromosome.toString() + " is better than " + chromosomes[i].toString());
+                }
             }
         }
+        if (positiveMutations/totalMutations < 0.2){
+            for (int i = 0; i < population; i++){
+                for (int j = 0; j < dimensions; j++){
+                    chromosomes[i].gaussValues[j] = chromosomes[i].gaussValues[j] * 0.8f;
+                }
+            }
+        } else {
+            for (int i = 0; i < population; i++){
+                for (int j = 0; j < dimensions; j++){
+                    chromosomes[i].gaussValues[j] = chromosomes[i].gaussValues[j] * 1.2f;
+                }
+            }
+        }
+
+        if (debug) System.out.println("Total mutations: " + totalMutations + " Positive mutations: " + positiveMutations);
     }
 
     public void evolve(boolean debug){
         for (int i = 0; i < generations; i++){
-            evolveOnce(i, i, debug);
+            evolveOnce(debug);
         }
     }
 
@@ -148,7 +169,7 @@ public class Inicialization {
     }
 
     public static void main(String[] args){
-        Inicialization inicialization = Inicialization.setup(10, 10, 5, 0.3f, 0.5f, 0.5f);
+        Inicialization inicialization = Inicialization.setup(1000, 100, 5, 0.3f, 0.5f, 0.5f);
         inicialization.determineReferenceZ();
         inicialization.evolve(true);
     }

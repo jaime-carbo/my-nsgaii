@@ -44,7 +44,15 @@ public class ChromosomeZDT3 {
     }
 
     public boolean isBetterThan(ChromosomeZDT3 chromosome, Float[] weights, boolean debug){
-        if (debug) System.out.println("Comparing " + this.toString() + " = " + this.fitness(weights)[2] + " with " + chromosome.toString() + " = " + chromosome.fitness(weights)[2]);
+        if (debug) {
+            System.out.println("Comparing " + this.toString() + " = " + this.fitness(weights)[2] + " with " + chromosome.toString() + " = " + chromosome.fitness(weights)[2]);
+            float euclideanDistance = 0;
+            for (int i = 0; i < this.genes.length; i++){
+                euclideanDistance += (this.genes[i] - chromosome.genes[i]) * (this.genes[i] - chromosome.genes[i]);
+            }
+            euclideanDistance = (float)Math.sqrt(euclideanDistance);
+            System.out.println("Euclidean distance: " + euclideanDistance);
+        }
         return this.fitness(weights)[2] < chromosome.fitness(weights)[2];
     }
     
