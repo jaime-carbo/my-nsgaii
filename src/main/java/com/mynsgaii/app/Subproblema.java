@@ -3,7 +3,6 @@ package com.mynsgaii.app;
 import java.util.Arrays;
 import java.util.Map;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 
 public class Subproblema {
@@ -14,6 +13,7 @@ public class Subproblema {
     public Subproblema(Float[] weight){
         this.weights = weight;
     }
+
 
     public Map<Subproblema, Float> setNeighbors(Subproblema[] neighbors, float neighborhoodSize){
         int nNeighbors = ((int)Math.ceil(neighbors.length*neighborhoodSize));

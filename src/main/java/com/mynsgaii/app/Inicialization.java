@@ -4,10 +4,6 @@ import java.util.Arrays;
 import java.util.Random;
 import java.util.stream.Stream;
 
-import com.Plotting;
-
-import javafx.stage.Stage;
-
 public class Inicialization {
     public int generations;
     public int population;
@@ -22,16 +18,22 @@ public class Inicialization {
     public int decreasedGauss = 0;
 
     public Float[] referenceZ;
+    public Float sigmaShare;
 
-    public Inicialization(int generations, int population, int dimensions, Float neighborhoodSize, Float crossoverRate) {
+    public Inicialization(int generations, int population, int dimensions, Float neighborhoodSize, Float crossoverRate, Float sigmaShare) {
         this.generations = generations;
         this.population = population;
         this.dimensions =  dimensions;
         this.neighborhoodSize = neighborhoodSize;
         this.crossoverRate = crossoverRate;
-        this.mutationRate = 1f/population;
+        this.mutationRate = 0.5f;
+        this.sigmaShare = sigmaShare;
         this.tau = 1 / (float) Math.sqrt(dimensions);
         this.subproblemas = new Subproblema[population];
+    }
+
+    public ChromosomeZDT3 getChromosomeFromSubproblema(Subproblema subproblema){
+        return chromosomes[Arrays.asList(subproblemas).indexOf(subproblema)];
     }
 
     public void populate(float min, float max){//Crea tantos cromosomas como poblacion y los inicializa con valores aleatorios
@@ -41,13 +43,13 @@ public class Inicialization {
             for (int j = 0; j < dimensions; j++){
                 genes[j] = (float) Math.random() * (max - min) + min;
             }
-            newChromosomes[i] = new ChromosomeZDT3(genes);
+            newChromosomes[i] = new ChromosomeZDT3(genes, this);
         }
         chromosomes = newChromosomes;
     }
 
-    public static Inicialization setup(int generations, int population, int dimensions, Float neighborhoodSize, Float crossoverRate){
-        Inicialization inicialization = new Inicialization(generations, population, dimensions, neighborhoodSize, crossoverRate);
+    public static Inicialization setup(int generations, int population, int dimensions, Float neighborhoodSize, Float crossoverRate, Float sigmaShare){
+        Inicialization inicialization = new Inicialization(generations, population, dimensions, neighborhoodSize, crossoverRate, sigmaShare);
         Float jump = 1 / (((float)population) - 1);
         Float counter = 0f;
         for (int i = 0; i < population; i++){
@@ -74,8 +76,8 @@ public class Inicialization {
         this.referenceZ = referenceZ;
     }
 
-    public ChromosomeZDT3 differentialEvolution(int index, boolean debug){
-        Subproblema[] neighborhood = subproblemas[index].neighborhood;
+    public ChromosomeZDT3 differentialEvolution(ChromosomeZDT3 chromosome, Subproblema subproblema, boolean debug){
+        Subproblema[] neighborhood = subproblema.neighborhood;
         int[] threeRandomPicks = new int[3];
         for (int i = 0; i < 3; i++){
             threeRandomPicks[i] = (int) (Math.random() * (neighborhood.length));
@@ -93,51 +95,68 @@ public class Inicialization {
             if (Math.random() < crossoverRate){
                 crossedGenes[i] = mutatedGenes[i];
             } else {
-                crossedGenes[i] = chromosomes[index].genes[i];
+                crossedGenes[i] = chromosome.genes[i];
             }
         }
         //DEBUG
         if (debug) System.out.println("Three random picks: " + Arrays.toString(threeRandomPicks));
         if (debug) System.out.println("Mutated genes: " + Arrays.toString(mutatedGenes));
         if (debug) System.out.println("Crossed genes: " + Arrays.toString(crossedGenes));
-        if (debug) System.out.println("Origin  genes: " + Arrays.toString(chromosomes[index].genes));
-        return new ChromosomeZDT3(crossedGenes);
+        if (debug) System.out.println("Origin  genes: " + Arrays.toString(chromosome.genes));
+        return new ChromosomeZDT3(crossedGenes, this);
     }
 
-    public ChromosomeZDT3 gaussianMutation(int index, boolean debug){
+    public ChromosomeZDT3 gaussianMutation(ChromosomeZDT3 chromosome, boolean debug){
         Float newGauss;
         Float newGene;
         Random random = new Random();
-        ChromosomeZDT3 newChromosomeZDT3 = new ChromosomeZDT3(chromosomes[index].genes.clone());
+        ChromosomeZDT3 newChromosomeZDT3 = chromosome.copy();
         for (int i = 0; i < dimensions; i++){
-            newGauss = chromosomes[index].gaussValues[i] * (float)Math.exp(tau * random.nextGaussian());
-            newGene = (float)(chromosomes[index].genes[i] + newGauss * random.nextGaussian());
+            newGauss = chromosome.gaussValues[i] * (float)Math.exp(tau * random.nextGaussian());
+            newGene = (float)(chromosome.genes[i] + newGauss * random.nextGaussian());
             newChromosomeZDT3.gaussValues[i] = newGauss;
             newChromosomeZDT3.genes[i] = clamp(newGene, 0, 1);
         }
         return newChromosomeZDT3;
     }
 
+    public void checkNeighbors(ChromosomeZDT3 chromosome, Subproblema subproblema){
+        Subproblema iSubproblema;
+        int index;
+        for (int i = 0; i < subproblema.neighborhood.length; i++){
+            iSubproblema = subproblema.neighborhood[i];
+            index = Arrays.asList(subproblemas).indexOf(subproblema.neighborhood[i]);
+            if (chromosome.isBetterThan(chromosomes[index], iSubproblema, false)){
+                chromosomes[index] = chromosome;
+            }
+        }
+    }
+
     public void evolveOnce(boolean debug){
         ChromosomeZDT3 newChromosome;
+        ChromosomeZDT3[] children = new ChromosomeZDT3[population];
         int totalMutations = 0;
         int positiveMutations = 0;
         for (int i = 0; i < population; i++){
+            newChromosome = chromosomes[i].copy();
             if (Math.random() > this.crossoverRate){
-                newChromosome = differentialEvolution(i, debug);
-                if (newChromosome.isBetterThan(chromosomes[i], subproblemas[i].weights, debug)){
+                newChromosome = differentialEvolution(newChromosome, subproblemas[i], debug);
+                if (newChromosome.isBetterThan(chromosomes[i], subproblemas[i], debug)){
                     if (debug) System.out.println("New chromosome:" + newChromosome.toString() + " is better than " + chromosomes[i].toString());
                     chromosomes[i] = newChromosome;
                 }
             } 
             if (Math.random() <= this.mutationRate){
-                newChromosome = gaussianMutation(i, debug);
+                newChromosome = gaussianMutation(newChromosome, debug);
                 totalMutations++;
-                if (newChromosome.isBetterThan(chromosomes[i], subproblemas[i].weights, debug)){
+                if (newChromosome.isBetterThan(chromosomes[i], subproblemas[i], debug)){
                     positiveMutations++;
-                    if (debug) System.out.println("New chromosome:" + newChromosome.toString() + " is better than " + chromosomes[i].toString());
                 }
+
             }
+            children[i] = newChromosome;
+            ChromosomeZDT3[] completeGeneration = Stream.concat(Arrays.stream(chromosomes), Arrays.stream(children)).toArray(ChromosomeZDT3[]::new);
+            //  checkNeighbors(newChromosome, subproblemas[i]);
         }
         if (totalMutations > 0){
             if (positiveMutations/totalMutations < 0.2){
@@ -179,7 +198,7 @@ public class Inicialization {
     }
 
     public static void main(String[] args){
-        Inicialization inicialization = Inicialization.setup(100, 100, 50, 0.3f, 0.5f);
+        Inicialization inicialization = Inicialization.setup(100, 100, 30, 0.3f, 0.5f, 0.1f);
         inicialization.determineReferenceZ();
         inicialization.evolve(false);
         Float[] xValues = new Float[inicialization.population];
@@ -188,9 +207,8 @@ public class Inicialization {
             xValues[i] = inicialization.chromosomes[i].f1();
             yValues[i] = inicialization.chromosomes[i].f2();
         }
-        System.out.println("xValues:" + xValues.length + " yValues:" + yValues.length);
-        Plotting plot = new Plotting(xValues, yValues, "ZDT3");
-        
+
+        DataSaving.saveXYValues("results", xValues, yValues);
 
     }
 }
