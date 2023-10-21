@@ -6,6 +6,7 @@ public class ChromosomeZDT3 {
     Float[] genes;
     Float[] gaussValues;
     Inicialization inicialization;
+    Float[] unweightedFitness;
     
     public ChromosomeZDT3(Float[] genes, Inicialization inicialization){
         this.genes = genes;
@@ -14,6 +15,32 @@ public class ChromosomeZDT3 {
         for (int i = 0; i < genes.length; i++){
             this.gaussValues[i] = 0.5f;
         }
+        Float[] fitness = new Float[2];
+        fitness[0] = f1();
+        fitness[1] = f2();
+        this.unweightedFitness = fitness;
+    }
+
+    void getGTE(ChromosomeZDT3 neighbor){
+
+        Subproblema subproblema = this.inicialization.getSubproblemaFromChromosome(neighbor);
+        ChromosomeZDT3 child = this;
+
+        inicialization.determineReferenceZ(child);
+
+        Float referenceZI = inicialization.referenceZ[0];
+        Float referenceZJ = inicialization.referenceZ[1];
+
+        Float neighborGTE = Math.max(subproblema.weights[0] * (neighbor.f1() - referenceZI), subproblema.weights[1] * (neighbor.f2() - referenceZJ));
+        //neighborGTE -= neighbor.fitnessSharing(subproblema);
+        Float childGTE = Math.max(subproblema.weights[0] * (child.f1() - referenceZI), subproblema.weights[1] * (child.f2() - referenceZJ));
+        //childGTE -= child.fitnessSharing(subproblema);
+        
+        if (childGTE <= neighborGTE){
+            int neighborIndex = Arrays.asList(this.inicialization.chromosomes).indexOf(neighbor);
+            this.inicialization.chromosomes[neighborIndex] = child;
+        }
+        
     }
 
 
@@ -22,22 +49,22 @@ public class ChromosomeZDT3 {
     }
 
     public Float[] fitness(Float[] weights){
-        Float[] fitness = new Float[3];
-        fitness[0] = f1();
-        fitness[1] = f2();
-        fitness[2] = weights[0] * f1() + weights[1] * f2();
-        return fitness;
+        Float[] allFitness = new Float[3];
+        allFitness[0] = unweightedFitness[0];
+        allFitness[1] = unweightedFitness[1];
+        allFitness[2] = unweightedFitness[0] * weights[0] + unweightedFitness[1] * weights[1];
+        return allFitness;
     }
 
-    public Float fitnessSharing(Subproblema subproblema, ChromosomeZDT3 chromosomeJ){
+    public Float fitnessSharing(Subproblema subproblema){
         Float fSharing = 0f;
         for (int i = 0; i < subproblema.neighborhood.length; i++){
             ChromosomeZDT3 neighboringChromosome = inicialization.getChromosomeFromSubproblema(subproblema.neighborhood[i]);
             if (eucliedanDistance(neighboringChromosome) < this.inicialization.sigmaShare){
-                fSharing += 1 - (eucliedanDistance(chromosomeJ)/this.inicialization.sigmaShare);
+                fSharing += 1 - (eucliedanDistance(neighboringChromosome)/this.inicialization.sigmaShare);
             }
         }
-        return fitness(subproblema.weights)[2] + fitness(subproblema.weights)[2] / (1 + fSharing);
+        return 1 / (1 + fSharing);
             
     }
     
@@ -76,8 +103,8 @@ public class ChromosomeZDT3 {
             System.out.println("Comparing " + this.toString() + " = " + this.fitness(subproblema.weights)[2] + " with " + chromosome.toString() + " = " + chromosome.fitness(subproblema.weights)[2]);
             System.out.println("Euclidean distance: " + eucliedanDistance(chromosome));
         }
-        Float fitnessShareI = fitnessSharing(subproblema, this);
-        Float fitnessShareJ = fitnessSharing(subproblema, chromosome);
+        Float fitnessShareI = fitnessSharing(subproblema);
+        Float fitnessShareJ = fitnessSharing(subproblema);
         // return this.fitness(subproblema.weights)[2] < chromosome.fitness(subproblema.weights)[2];
         return fitnessShareI < fitnessShareJ;
     }

@@ -7,7 +7,7 @@ public class DataSaving {
 
     public static void saveXYValues(String fileName, Float[] xValues, Float[] yValues){
         try {
-            File directory = new File("./src/main/java/com/mynsgaii/app/results/");
+            File directory = new File("/home/jaime/Desktop/MYNSGAIIcopy/my-nsgaii/src/main/java/com/mynsgaii/app/results");
             File file = new File(directory, fileName);
             if (file.createNewFile()) System.out.println("created");;
             FileWriter writer = new FileWriter(file);

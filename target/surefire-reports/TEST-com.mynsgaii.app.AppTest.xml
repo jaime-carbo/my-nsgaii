@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="UTF-8" ?>
-<testsuite tests="1" failures="0" name="com.mynsgaii.app.AppTest" time="0.007" errors="0" skipped="0">
+<testsuite tests="1" failures="0" name="com.mynsgaii.app.AppTest" time="0.005" errors="0" skipped="0">
   <properties>
     <property name="java.runtime.name" value="Java(TM) SE Runtime Environment"/>
     <property name="java.vm.version" value="21+35-LTS-2513"/>
     <property name="sun.boot.library.path" value="/usr/lib/jvm/jdk-21-oracle-x64/lib"/>
-    <property name="maven.multiModuleProjectDirectory" value="/home/jaime/Desktop/MY NSGAII/my-nsgaii"/>
+    <property name="maven.multiModuleProjectDirectory" value="/home/jaime/Desktop/MYNSGAIIcopy/my-nsgaii"/>
     <property name="java.vm.vendor" value="Oracle Corporation"/>
     <property name="java.vendor.url" value="https://java.oracle.com/"/>
     <property name="guice.disable.misplaced.annotation.check" value="true"/>
@@ -13,7 +13,7 @@
     <property name="user.country" value="US"/>
     <property name="sun.java.launcher" value="SUN_STANDARD"/>
     <property name="java.vm.specification.name" value="Java Virtual Machine Specification"/>
-    <property name="user.dir" value="/home/jaime/Desktop/MY NSGAII/my-nsgaii"/>
+    <property name="user.dir" value="/home/jaime/Desktop/MYNSGAIIcopy"/>
     <property name="java.vm.compressedOopsMode" value="Zero based"/>
     <property name="java.runtime.version" value="21+35-LTS-2513"/>
     <property name="os.arch" value="amd64"/>
@@ -42,7 +42,7 @@
     <property name="java.class.path" value="/usr/share/maven/boot/plexus-classworlds-2.x.jar"/>
     <property name="java.vm.specification.version" value="21"/>
     <property name="sun.arch.data.model" value="64"/>
-    <property name="sun.java.command" value="org.codehaus.plexus.classworlds.launcher.Launcher clean dependency:copy-dependencies package"/>
+    <property name="sun.java.command" value="org.codehaus.plexus.classworlds.launcher.Launcher package -f /home/jaime/Desktop/MYNSGAIIcopy/my-nsgaii/pom.xml"/>
     <property name="java.home" value="/usr/lib/jvm/jdk-21-oracle-x64"/>
     <property name="user.language" value="en"/>
     <property name="java.specification.vendor" value="Oracle Corporation"/>
@@ -57,5 +57,5 @@
     <property name="sun.io.unicode.encoding" value="UnicodeLittle"/>
     <property name="sun.cpu.endian" value="little"/>
   </properties>
-  <testcase classname="com.mynsgaii.app.AppTest" name="testApp" time="0.007"/>
+  <testcase classname="com.mynsgaii.app.AppTest" name="testApp" time="0.005"/>
 </testsuite>
