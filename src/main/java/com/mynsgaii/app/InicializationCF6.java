@@ -1,16 +1,20 @@
 package com.mynsgaii.app;
 
+import java.util.Arrays;
+import java.util.Random;
+import java.util.Scanner;
 import java.util.stream.Stream;
-import java.util.*;
 
-public class Inicialization {
+public class InicializationCF6 {
+    //Copy the implementation of Inicialization.java here but change the type of the chromosomes to ChromosomeCF6
+
     public int generations;
     public int population;
     public int dimensions;
     public Float neighborhoodSize;
     public Float crossoverRate;
     public Float mutationRate;
-    public ChromosomeZDT3[] chromosomes;//cromosomas de la poblacion
+    public ChromosomeCF6[] chromosomes;//cromosomas de la poblacion
     public Subproblema[] subproblemas;
     public Float tau;
     public int increasedGauss = 0;
@@ -19,7 +23,7 @@ public class Inicialization {
     public Float[] referenceZ;
     public Float sigmaShare;
 
-    public Inicialization(int generations, int population, int dimensions, Float neighborhoodSize, Float crossoverRate, Float sigmaShare) {
+    public InicializationCF6(int generations, int population, int dimensions, Float neighborhoodSize, Float crossoverRate, Float sigmaShare) {
         this.generations = generations;
         this.population = population;
         this.dimensions =  dimensions;
@@ -31,22 +35,22 @@ public class Inicialization {
         this.subproblemas = new Subproblema[population];
     }
 
-    public ChromosomeZDT3 getChromosomeFromSubproblema(Subproblema subproblema){
+    public ChromosomeCF6 getChromosomeFromSubproblema(Subproblema subproblema){
         return chromosomes[Arrays.asList(subproblemas).indexOf(subproblema)];
     }
 
-    public Subproblema getSubproblemaFromChromosome(ChromosomeZDT3 chromosome){
+    public Subproblema getSubproblemaFromChromosome(ChromosomeCF6 chromosome){
         return subproblemas[Arrays.asList(chromosomes).indexOf(chromosome)];
     }
 
     public void populate(float min, float max){//Crea tantos cromosomas como poblacion y los inicializa con valores aleatorios
-        ChromosomeZDT3[] newChromosomes = new ChromosomeZDT3[population];
+        ChromosomeCF6[] newChromosomes = new ChromosomeCF6[population];
         for (int i = 0; i < population; i++){
             Float[] genes = new Float[dimensions];
             for (int j = 0; j < dimensions; j++){
                 genes[j] = (float) Math.random() * (max - min) + min;
             }
-            newChromosomes[i] = new ChromosomeZDT3(genes, this);
+            newChromosomes[i] = new ChromosomeCF6(genes, this);
         }
         chromosomes = newChromosomes;
     }
@@ -70,9 +74,9 @@ public class Inicialization {
         return inicialization;
     }
 
-    public void determineReferenceZ(ChromosomeZDT3 extraChromosomeZDT3){
+    public void determineReferenceZ(ChromosomeCF6 extraChromosomeCF6){
         Float[] referenceZ = new Float[2];
-        ChromosomeZDT3[] allChromosomes = Stream.concat(Arrays.stream(chromosomes), Stream.of(extraChromosomeZDT3)).toArray(ChromosomeZDT3[]::new);
+        ChromosomeCF6[] allChromosomes = Stream.concat(Arrays.stream(chromosomes), Stream.of(extraChromosomeCF6)).toArray(ChromosomeCF6[]::new);
         Float minf1 = Stream.of(allChromosomes).map(chromosome -> chromosome.f1()).min(Float::compare).get();
         Float minf2 = Stream.of(allChromosomes).map(chromosome -> chromosome.f2()).min(Float::compare).get();
         referenceZ[0] = minf1;
@@ -80,7 +84,7 @@ public class Inicialization {
         this.referenceZ = referenceZ;
     }
 
-    public ChromosomeZDT3 differentialEvolution(ChromosomeZDT3 chromosome, Subproblema subproblema, boolean debug){
+    public ChromosomeCF6 differentialEvolution(ChromosomeCF6 chromosome, Subproblema subproblema, boolean debug){
         Subproblema[] neighborhood = subproblema.neighborhood;
         int[] threeRandomPicks = new int[3];
         for (int i = 0; i < 3; i++){
@@ -111,72 +115,37 @@ public class Inicialization {
         if (debug) System.out.println("Mutated genes: " + Arrays.toString(mutatedGenes));
         if (debug) System.out.println("Crossed genes: " + Arrays.toString(crossedGenes));
         if (debug) System.out.println("Origin  genes: " + Arrays.toString(chromosome.genes));
-        return new ChromosomeZDT3(crossedGenes, this);
+        return new ChromosomeCF6(crossedGenes, this);
     }
 
-    public ChromosomeZDT3 gaussianMutation(ChromosomeZDT3 chromosome, boolean debug){
+    public ChromosomeCF6 gaussianMutation(ChromosomeCF6 chromosome, boolean debug){
         Float newGauss;
         Float newGene;
         Random random = new Random();
-        ChromosomeZDT3 newChromosomeZDT3 = chromosome.copy();
+        ChromosomeCF6 newChromosomeCF6 = chromosome.copy();
         for (int i = 0; i < dimensions; i++){
             if (Math.random() < mutationRate){
                 newGauss = chromosome.gaussValues[i] * (float)Math.exp(tau * random.nextGaussian());
                 newGene = (float)(chromosome.genes[i] + newGauss * random.nextGaussian());
-                newChromosomeZDT3.gaussValues[i] = newGauss;
-                newChromosomeZDT3.genes[i] = bounce(newGene, 0, 1);
+                newChromosomeCF6.gaussValues[i] = newGauss;
+                newChromosomeCF6.genes[i] = bounce(newGene, 0, 1);
             }
         }
-        return newChromosomeZDT3;
+        return newChromosomeCF6;
     }
 
-    // public void checkNeighbors(ChromosomeZDT3 chromosome, Subproblema subproblema){
-    //     Subproblema iSubproblema;
-    //     int index;
-    //     for (int i = 0; i < subproblema.neighborhood.length; i++){
-    //         iSubproblema = subproblema.neighborhood[i];
-    //         index = Arrays.asList(subproblemas).indexOf(subproblema.neighborhood[i]);
-    //         if (chromosome.isBetterThan(chromosomes[index], iSubproblema, false)){
-    //             chromosomes[index] = chromosome;
-    //         }
-    //     }
-    // }
-
-    // public void tournamentSelection(ChromosomeZDT3[] completeGeneration){
-    //     ChromosomeZDT3 chromosomeI;
-    //     ChromosomeZDT3 chromosomeJ;
-    //     for (int i = 0; i < population; i++){
-    //         chromosomeI = completeGeneration[(int)(Math.random() * (completeGeneration.length))];
-    //         chromosomeJ = completeGeneration[(int)(Math.random() * (completeGeneration.length))];
-    //         if (chromosomeI.isBetterThan(chromosomeJ, subproblemas[i], false)){
-    //             chromosomes[i] = chromosomeI;
-    //         } else {
-    //             chromosomes[i] = chromosomeJ;
-    //         }
-    //     }
-    // }
 
     public void evolveOnce(boolean debug){
-        ChromosomeZDT3 newChromosome;
+        ChromosomeCF6 newChromosome;
         for (int i = 0; i < population; i++){
             newChromosome = chromosomes[i].copy();
-
-            /*DIFFERENTIAL CROSSOVER */
-            // if (Math.random() > this.crossoverRate){
-            //     newChromosome = differentialEvolution(newChromosome, subproblemas[i], debug);
-            // } 
             newChromosome = differentialEvolution(newChromosome, subproblemas[i], debug);
-
-            /*GAUSS MUTATION */
-            // if (Math.random() <= this.mutationRate){
-            //     newChromosome = gaussianMutation(newChromosome, debug);
-            // }
             newChromosome = gaussianMutation(newChromosome, debug);
 
             /*CHECKING GTE */
             for (int neighborIndex = 0; neighborIndex < subproblemas[i].neighborhood.length; neighborIndex++){
                 Subproblema neighbor = subproblemas[i].neighborhood[neighborIndex];
-                ChromosomeZDT3 neighborChromosome = chromosomes[Arrays.asList(subproblemas).indexOf(neighbor)];
+                ChromosomeCF6 neighborChromosome = chromosomes[Arrays.asList(subproblemas).indexOf(neighbor)];
                 newChromosome.getGTE(neighborChromosome);
             }
         }
@@ -213,23 +182,24 @@ public class Inicialization {
     }
 
     public static void main(String[] args){
-        Scanner sc= new Scanner(System.in);
-        System.out.print("Enter number of generations: ");
-        int gens = sc.nextInt(); 
-        System.out.print("Enter population size: ");
-        int population = sc.nextInt(); 
-        sc.close();
-        Inicialization inicialization = Inicialization.setup(gens, population, 30, 1/5f, 0.5f, 0.1f);
-        inicialization.evolve(false);
-        Float[] xValues = new Float[inicialization.population];
-        Float[] yValues = new Float[inicialization.population];
-        for (int i = 0; i < inicialization.population; i++){
-            xValues[i] = inicialization.chromosomes[i].f1();
-            yValues[i] = inicialization.chromosomes[i].f2();
-        }
-        System.out.println("Done");
-        DataSaving.saveXYValues("results-"+"p"+inicialization.population+"g"+inicialization.generations, xValues, yValues);
+        CF6ParetoOptimal pareto = new CF6ParetoOptimal(200);
+        pareto.writeInFile();
+        // Scanner sc= new Scanner(System.in);
+        // System.out.print("Enter number of generations: ");
+        // int gens = sc.nextInt(); 
+        // System.out.print("Enter population size: ");
+        // int population = sc.nextInt();
+        // sc.close(); 
+        // Inicialization inicialization = Inicialization.setup(gens, population, 30, 1/5f, 0.5f, 0.1f);
+        // inicialization.evolve(false);
+        // Float[] xValues = new Float[inicialization.population];
+        // Float[] yValues = new Float[inicialization.population];
+        // for (int i = 0; i < inicialization.population; i++){
+        //     xValues[i] = inicialization.chromosomes[i].f1();
+        //     yValues[i] = inicialization.chromosomes[i].f2();
+        // }
+        // System.out.println("Done");
+        // DataSaving.saveXYValues("results-"+"p"+inicialization.population+"g"+inicialization.generations, xValues, yValues);
 
     }
 }
-
