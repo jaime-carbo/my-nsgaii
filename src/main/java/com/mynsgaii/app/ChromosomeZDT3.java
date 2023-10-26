@@ -35,8 +35,11 @@ public class ChromosomeZDT3 {
         //neighborGTE -= neighbor.fitnessSharing(subproblema);
         Float childGTE = Math.max(subproblema.weights[0] * (child.f1() - referenceZI), subproblema.weights[1] * (child.f2() - referenceZJ));
         //childGTE -= child.fitnessSharing(subproblema);
+        Float beta = 0.005f;
+        Float childWithFS = child.gteWithFitnessShare(childGTE, subproblema, beta);
+        Float neighborWithFS = neighbor.gteWithFitnessShare(neighborGTE, subproblema, beta);
         
-        if (childGTE <= neighborGTE){
+        if (childWithFS <= neighborWithFS){
             int neighborIndex = Arrays.asList(this.inicialization.chromosomes).indexOf(neighbor);
             this.inicialization.chromosomes[neighborIndex] = child;
         }
@@ -61,11 +64,15 @@ public class ChromosomeZDT3 {
         for (int i = 0; i < subproblema.neighborhood.length; i++){
             ChromosomeZDT3 neighboringChromosome = inicialization.getChromosomeFromSubproblema(subproblema.neighborhood[i]);
             if (eucliedanDistance(neighboringChromosome) < this.inicialization.sigmaShare){
-                fSharing += 1 - (eucliedanDistance(neighboringChromosome)/this.inicialization.sigmaShare);
+                fSharing += (eucliedanDistance(neighboringChromosome));
             }
         }
-        return 1 / (1 + fSharing);
+        return fSharing;
             
+    }
+
+    public Float gteWithFitnessShare(Float tchebycheff,Subproblema subproblema,  Float beta){
+        return  beta * this.fitnessSharing(subproblema) + (1 - beta) * tchebycheff;
     }
     
 

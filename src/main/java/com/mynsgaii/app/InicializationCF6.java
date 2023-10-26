@@ -47,7 +47,13 @@ public class InicializationCF6 {
         ChromosomeCF6[] newChromosomes = new ChromosomeCF6[population];
         for (int i = 0; i < population; i++){
             Float[] genes = new Float[dimensions];
+            min = 0f;
+            max = 1f;   
             for (int j = 0; j < dimensions; j++){
+                if (j != 0) {
+                    min = -2f;
+                    max = 2f;   
+                }
                 genes[j] = (float) Math.random() * (max - min) + min;
             }
             newChromosomes[i] = new ChromosomeCF6(genes, this);
@@ -55,8 +61,8 @@ public class InicializationCF6 {
         chromosomes = newChromosomes;
     }
 
-    public static Inicialization setup(int generations, int population, int dimensions, Float neighborhoodSize, Float crossoverRate, Float sigmaShare){
-        Inicialization inicialization = new Inicialization(generations, population, dimensions, neighborhoodSize, crossoverRate, sigmaShare);
+    public static InicializationCF6 setup(int generations, int population, int dimensions, Float neighborhoodSize, Float crossoverRate, Float sigmaShare){
+        InicializationCF6 inicialization = new InicializationCF6(generations, population, dimensions, neighborhoodSize, crossoverRate, sigmaShare);
         Float jump = 1 / (((float)population) - 1);
         Float counter = 0f;
         for (int i = 0; i < population; i++){
@@ -91,13 +97,23 @@ public class InicializationCF6 {
             threeRandomPicks[i] = (int) (Math.random() * (neighborhood.length));
         }
         Float[] mutatedGenes = new Float[dimensions];
+        Float min = 0f;
+        Float max = 1f;
         for (int i = 0; i < dimensions; i++){
+            if (i == 0) {
+                min = 0f;
+                max = 1f;
+            } else {
+                min = -2f;
+                max = 2f;   
+            }
+
             if (Math.random() < crossoverRate){
-            mutatedGenes[i] = bounce(chromosomes[threeRandomPicks[0]].genes[i] + 
-                    0.5f * (
-                        chromosomes[threeRandomPicks[1]].genes[i] -
-                        chromosomes[threeRandomPicks[2]].genes[i]),
-                        0, 1);
+                mutatedGenes[i] = bounce(chromosomes[threeRandomPicks[0]].genes[i] + 
+                        0.5f * (
+                            chromosomes[threeRandomPicks[1]].genes[i] -
+                            chromosomes[threeRandomPicks[2]].genes[i]),
+                            min, max);
             } else {
                 mutatedGenes[i] = chromosome.genes[i];
             }
@@ -123,12 +139,21 @@ public class InicializationCF6 {
         Float newGene;
         Random random = new Random();
         ChromosomeCF6 newChromosomeCF6 = chromosome.copy();
+        Float min = 0f;
+        Float max = 1f;
         for (int i = 0; i < dimensions; i++){
+            if (i == 0) {
+                min = 0f;
+                max = 1f;
+            } else {
+                min = -2f;
+                max = 2f;   
+            }
             if (Math.random() < mutationRate){
                 newGauss = chromosome.gaussValues[i] * (float)Math.exp(tau * random.nextGaussian());
                 newGene = (float)(chromosome.genes[i] + newGauss * random.nextGaussian());
                 newChromosomeCF6.gaussValues[i] = newGauss;
-                newChromosomeCF6.genes[i] = bounce(newGene, 0, 1);
+                newChromosomeCF6.genes[i] = bounce(newGene, min, max);
             }
         }
         return newChromosomeCF6;
@@ -141,14 +166,16 @@ public class InicializationCF6 {
             newChromosome = chromosomes[i].copy();
             newChromosome = differentialEvolution(newChromosome, subproblemas[i], debug);
             newChromosome = gaussianMutation(newChromosome, debug);
-
             /*CHECKING GTE */
             for (int neighborIndex = 0; neighborIndex < subproblemas[i].neighborhood.length; neighborIndex++){
                 Subproblema neighbor = subproblemas[i].neighborhood[neighborIndex];
                 ChromosomeCF6 neighborChromosome = chromosomes[Arrays.asList(subproblemas).indexOf(neighbor)];
-                newChromosome.getGTE(neighborChromosome);
+                if (newChromosome.getRestrictions()[2] == 0 && neighborChromosome.getRestrictions()[2] == 0){
+                    newChromosome.getGTE(neighborChromosome);
+                }
             }
-        }
+            newChromosome.getGTE(chromosomes[i]);
+            }
     }
 
     public void evolve(boolean debug){

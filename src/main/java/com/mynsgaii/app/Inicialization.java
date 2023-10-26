@@ -25,7 +25,7 @@ public class Inicialization {
         this.dimensions =  dimensions;
         this.neighborhoodSize = neighborhoodSize;
         this.crossoverRate = crossoverRate;
-        this.mutationRate = 1 / (float) dimensions;
+        this.mutationRate = 2 / (float) dimensions;
         this.sigmaShare = sigmaShare;
         this.tau = 1 / (float) Math.sqrt(dimensions);
         this.subproblemas = new Subproblema[population];
@@ -213,23 +213,46 @@ public class Inicialization {
     }
 
     public static void main(String[] args){
-        Scanner sc= new Scanner(System.in);
-        System.out.print("Enter number of generations: ");
-        int gens = sc.nextInt(); 
-        System.out.print("Enter population size: ");
-        int population = sc.nextInt(); 
-        sc.close();
-        Inicialization inicialization = Inicialization.setup(gens, population, 30, 1/5f, 0.5f, 0.1f);
-        inicialization.evolve(false);
-        Float[] xValues = new Float[inicialization.population];
-        Float[] yValues = new Float[inicialization.population];
-        for (int i = 0; i < inicialization.population; i++){
-            xValues[i] = inicialization.chromosomes[i].f1();
-            yValues[i] = inicialization.chromosomes[i].f2();
+        int whichAlg = Integer.parseInt(args[0]);
+        int population = Integer.parseInt(args[1]);
+        int gens = Integer.parseInt(args[2]);
+        // int whichAlg = 0;
+        // int population = 100;
+        // int gens = 100;
+        if (whichAlg == 0){
+            System.out.println("CF6");
+            InicializationCF6 inicialization = InicializationCF6.setup(gens, population, 4, 1/3f, 0.5f, 0.1f);
+            inicialization.evolve(false);   
+            String fileName = "CF6results-p"+inicialization.population+"g"+inicialization.generations;
+            Float[] xValues = new Float[inicialization.population];
+            Float[] yValues = new Float[inicialization.population];
+            Float[] restriction1 = new Float[inicialization.population];
+            Float[] restriction2 = new Float[inicialization.population];
+            for (int i = 0; i < inicialization.population; i++){
+                xValues[i] = inicialization.chromosomes[i].f1();
+                yValues[i] = inicialization.chromosomes[i].f2();
+                restriction1[i] = inicialization.chromosomes[i].getRestrictions()[0];
+                restriction2[i] = inicialization.chromosomes[i].getRestrictions()[1];
+            }
+            System.out.println("Done");
+            DataSaving.saveXYValues(fileName, xValues, yValues);
+            DataSaving.saveWXYZ(fileName+"withRestrictions", xValues, yValues, restriction1, restriction2);
+        } else {
+            System.out.println("ZDT3");
+            Inicialization inicialization = Inicialization.setup(gens, population, 30, 1/3f, 0.5f, 0.1f);
+            inicialization.evolve(false);
+            String fileName = "ZDT3results-p"+inicialization.population+"g"+inicialization.generations;
+            Float[] xValues = new Float[inicialization.population];
+            Float[] yValues = new Float[inicialization.population];
+            for (int i = 0; i < inicialization.population; i++){
+                xValues[i] = inicialization.chromosomes[i].f1();
+                yValues[i] = inicialization.chromosomes[i].f2();
+            }
+            System.out.println("Done");
+            DataSaving.saveXYValues(fileName, xValues, yValues);
+        
         }
-        System.out.println("Done");
-        DataSaving.saveXYValues("results-"+"p"+inicialization.population+"g"+inicialization.generations, xValues, yValues);
-
+        
     }
 }
 
