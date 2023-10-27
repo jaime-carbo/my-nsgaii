@@ -21,7 +21,7 @@ public class ChromosomeZDT3 {
         this.unweightedFitness = fitness;
     }
 
-    void getGTE(ChromosomeZDT3 neighbor){
+    int getGTE(ChromosomeZDT3 neighbor){
 
         Subproblema subproblema = this.inicialization.getSubproblemaFromChromosome(neighbor);
         ChromosomeZDT3 child = this;
@@ -35,14 +35,16 @@ public class ChromosomeZDT3 {
         //neighborGTE -= neighbor.fitnessSharing(subproblema);
         Float childGTE = Math.max(subproblema.weights[0] * (child.f1() - referenceZI), subproblema.weights[1] * (child.f2() - referenceZJ));
         //childGTE -= child.fitnessSharing(subproblema);
-        Float beta = 0.005f;
-        Float childWithFS = child.gteWithFitnessShare(childGTE, subproblema, beta);
-        Float neighborWithFS = neighbor.gteWithFitnessShare(neighborGTE, subproblema, beta);
+        // Float beta = 0.005f;
+        // Float childWithFS = child.gteWithFitnessShare(childGTE, subproblema, beta);
+        // Float neighborWithFS = neighbor.gteWithFitnessShare(neighborGTE, subproblema, beta);
         
-        if (childWithFS <= neighborWithFS){
+        if (childGTE < neighborGTE){
             int neighborIndex = Arrays.asList(this.inicialization.chromosomes).indexOf(neighbor);
             this.inicialization.chromosomes[neighborIndex] = child;
+            return 1;
         }
+        return 0;
         
     }
 

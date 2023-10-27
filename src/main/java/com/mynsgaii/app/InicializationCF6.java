@@ -2,7 +2,6 @@ package com.mynsgaii.app;
 
 import java.util.Arrays;
 import java.util.Random;
-import java.util.Scanner;
 import java.util.stream.Stream;
 
 public class InicializationCF6 {
@@ -19,20 +18,21 @@ public class InicializationCF6 {
     public Float tau;
     public int increasedGauss = 0;
     public int decreasedGauss = 0;
-
     public Float[] referenceZ;
     public Float sigmaShare;
+    public Random random;
 
-    public InicializationCF6(int generations, int population, int dimensions, Float neighborhoodSize, Float crossoverRate, Float sigmaShare) {
+    public InicializationCF6(int generations, int population,Long randomSeed , int dimensions, Float neighborhoodSize, Float crossoverRate) {
         this.generations = generations;
         this.population = population;
         this.dimensions =  dimensions;
         this.neighborhoodSize = neighborhoodSize;
         this.crossoverRate = crossoverRate;
         this.mutationRate = 1 / (float) dimensions;
-        this.sigmaShare = sigmaShare;
+        this.sigmaShare = 0.1f;
         this.tau = 1 / (float) Math.sqrt(dimensions);
         this.subproblemas = new Subproblema[population];
+        this.random = new Random(randomSeed);
     }
 
     public ChromosomeCF6 getChromosomeFromSubproblema(Subproblema subproblema){
@@ -54,15 +54,15 @@ public class InicializationCF6 {
                     min = -2f;
                     max = 2f;   
                 }
-                genes[j] = (float) Math.random() * (max - min) + min;
+                genes[j] = random.nextFloat() * (max - min) + min;
             }
             newChromosomes[i] = new ChromosomeCF6(genes, this);
         }
         chromosomes = newChromosomes;
     }
 
-    public static InicializationCF6 setup(int generations, int population, int dimensions, Float neighborhoodSize, Float crossoverRate, Float sigmaShare){
-        InicializationCF6 inicialization = new InicializationCF6(generations, population, dimensions, neighborhoodSize, crossoverRate, sigmaShare);
+    public static InicializationCF6 setup(int generations, int population,Long randomSeed , int dimensions, Float neighborhoodSize, Float crossoverRate){
+        InicializationCF6 inicialization = new InicializationCF6(generations, population, randomSeed, dimensions, neighborhoodSize, crossoverRate);
         Float jump = 1 / (((float)population) - 1);
         Float counter = 0f;
         for (int i = 0; i < population; i++){
@@ -94,7 +94,7 @@ public class InicializationCF6 {
         Subproblema[] neighborhood = subproblema.neighborhood;
         int[] threeRandomPicks = new int[3];
         for (int i = 0; i < 3; i++){
-            threeRandomPicks[i] = (int) (Math.random() * (neighborhood.length));
+            threeRandomPicks[i] = (int) (random.nextFloat() * (neighborhood.length));
         }
         Float[] mutatedGenes = new Float[dimensions];
         Float min = 0f;
@@ -108,7 +108,7 @@ public class InicializationCF6 {
                 max = 2f;   
             }
 
-            if (Math.random() < crossoverRate){
+            if (random.nextFloat() < crossoverRate){
                 mutatedGenes[i] = bounce(chromosomes[threeRandomPicks[0]].genes[i] + 
                         0.5f * (
                             chromosomes[threeRandomPicks[1]].genes[i] -
@@ -120,7 +120,7 @@ public class InicializationCF6 {
         }
         Float[] crossedGenes = new Float[dimensions];
         for (int i = 0; i < dimensions; i++){
-            if (Math.random() < crossoverRate){
+            if (random.nextFloat() < crossoverRate){
                 crossedGenes[i] = mutatedGenes[i];
             } else {
                 crossedGenes[i] = chromosome.genes[i];
@@ -137,7 +137,6 @@ public class InicializationCF6 {
     public ChromosomeCF6 gaussianMutation(ChromosomeCF6 chromosome, boolean debug){
         Float newGauss;
         Float newGene;
-        Random random = new Random();
         ChromosomeCF6 newChromosomeCF6 = chromosome.copy();
         Float min = 0f;
         Float max = 1f;
@@ -149,7 +148,7 @@ public class InicializationCF6 {
                 min = -2f;
                 max = 2f;   
             }
-            if (Math.random() < mutationRate){
+            if (random.nextFloat() < mutationRate){
                 newGauss = chromosome.gaussValues[i] * (float)Math.exp(tau * random.nextGaussian());
                 newGene = (float)(chromosome.genes[i] + newGauss * random.nextGaussian());
                 newChromosomeCF6.gaussValues[i] = newGauss;

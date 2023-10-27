@@ -15,20 +15,22 @@ public class Inicialization {
     public Float tau;
     public int increasedGauss = 0;
     public int decreasedGauss = 0;
-
     public Float[] referenceZ;
     public Float sigmaShare;
+    public Random random;
 
-    public Inicialization(int generations, int population, int dimensions, Float neighborhoodSize, Float crossoverRate, Float sigmaShare) {
+    public Inicialization(int generations, int population,Long randomSeed, int dimensions, Float neighborhoodSize, Float crossoverRate) {
         this.generations = generations;
         this.population = population;
         this.dimensions =  dimensions;
         this.neighborhoodSize = neighborhoodSize;
         this.crossoverRate = crossoverRate;
-        this.mutationRate = 2 / (float) dimensions;
-        this.sigmaShare = sigmaShare;
+        this.mutationRate = 1 / (float) dimensions;
+        this.sigmaShare = 0.1f;
         this.tau = 1 / (float) Math.sqrt(dimensions);
         this.subproblemas = new Subproblema[population];
+        this.random = new Random(randomSeed);
+
     }
 
     public ChromosomeZDT3 getChromosomeFromSubproblema(Subproblema subproblema){
@@ -44,15 +46,15 @@ public class Inicialization {
         for (int i = 0; i < population; i++){
             Float[] genes = new Float[dimensions];
             for (int j = 0; j < dimensions; j++){
-                genes[j] = (float) Math.random() * (max - min) + min;
+                genes[j] = (float) random.nextFloat() * (max - min) + min;
             }
             newChromosomes[i] = new ChromosomeZDT3(genes, this);
         }
         chromosomes = newChromosomes;
     }
 
-    public static Inicialization setup(int generations, int population, int dimensions, Float neighborhoodSize, Float crossoverRate, Float sigmaShare){
-        Inicialization inicialization = new Inicialization(generations, population, dimensions, neighborhoodSize, crossoverRate, sigmaShare);
+    public static Inicialization setup(int generations, int population, Long randomSeed, int dimensions, Float neighborhoodSize, Float crossoverRate){
+        Inicialization inicialization = new Inicialization(generations, population, randomSeed, dimensions, neighborhoodSize, crossoverRate);
         Float jump = 1 / (((float)population) - 1);
         Float counter = 0f;
         for (int i = 0; i < population; i++){
@@ -84,11 +86,11 @@ public class Inicialization {
         Subproblema[] neighborhood = subproblema.neighborhood;
         int[] threeRandomPicks = new int[3];
         for (int i = 0; i < 3; i++){
-            threeRandomPicks[i] = (int) (Math.random() * (neighborhood.length));
+            threeRandomPicks[i] = (int) (random.nextFloat() * (neighborhood.length));
         }
         Float[] mutatedGenes = new Float[dimensions];
         for (int i = 0; i < dimensions; i++){
-            if (Math.random() < crossoverRate){
+            if (random.nextFloat() < crossoverRate){
             mutatedGenes[i] = bounce(chromosomes[threeRandomPicks[0]].genes[i] + 
                     0.5f * (
                         chromosomes[threeRandomPicks[1]].genes[i] -
@@ -100,7 +102,7 @@ public class Inicialization {
         }
         Float[] crossedGenes = new Float[dimensions];
         for (int i = 0; i < dimensions; i++){
-            if (Math.random() < crossoverRate){
+            if (random.nextFloat() < crossoverRate){
                 crossedGenes[i] = mutatedGenes[i];
             } else {
                 crossedGenes[i] = chromosome.genes[i];
@@ -117,15 +119,15 @@ public class Inicialization {
     public ChromosomeZDT3 gaussianMutation(ChromosomeZDT3 chromosome, boolean debug){
         Float newGauss;
         Float newGene;
-        Random random = new Random();
         ChromosomeZDT3 newChromosomeZDT3 = chromosome.copy();
         for (int i = 0; i < dimensions; i++){
-            if (Math.random() < mutationRate){
+            if (random.nextFloat() < mutationRate){
                 newGauss = chromosome.gaussValues[i] * (float)Math.exp(tau * random.nextGaussian());
                 newGene = (float)(chromosome.genes[i] + newGauss * random.nextGaussian());
                 newChromosomeZDT3.gaussValues[i] = newGauss;
                 newChromosomeZDT3.genes[i] = bounce(newGene, 0, 1);
             }
+            
         }
         return newChromosomeZDT3;
     }
@@ -174,10 +176,12 @@ public class Inicialization {
             newChromosome = gaussianMutation(newChromosome, debug);
 
             /*CHECKING GTE */
+            int positiveSwitches = 0;
             for (int neighborIndex = 0; neighborIndex < subproblemas[i].neighborhood.length; neighborIndex++){
+                if (positiveSwitches >= 5) break;
                 Subproblema neighbor = subproblemas[i].neighborhood[neighborIndex];
                 ChromosomeZDT3 neighborChromosome = chromosomes[Arrays.asList(subproblemas).indexOf(neighbor)];
-                newChromosome.getGTE(neighborChromosome);
+                positiveSwitches += newChromosome.getGTE(neighborChromosome);
             }
         }
     }
@@ -216,14 +220,17 @@ public class Inicialization {
         int whichAlg = Integer.parseInt(args[0]);
         int population = Integer.parseInt(args[1]);
         int gens = Integer.parseInt(args[2]);
+        Long randomSeed = Long.parseLong(args[3]);
+        int dimensions = Integer.parseInt(args[4]);
+        int neighborhoodSize = Integer.parseInt(args[5]);
         // int whichAlg = 0;
         // int population = 100;
         // int gens = 100;
         if (whichAlg == 0){
             System.out.println("CF6");
-            InicializationCF6 inicialization = InicializationCF6.setup(gens, population, 4, 1/3f, 0.5f, 0.1f);
-            inicialization.evolve(false);   
-            String fileName = "CF6results-p"+inicialization.population+"g"+inicialization.generations;
+            InicializationCF6 inicialization = InicializationCF6.setup(gens, population, randomSeed, dimensions,(float) 1/neighborhoodSize, 0.5f);
+            inicialization.evolve(false);
+            String fileName = "CF6results-p"+inicialization.population+"g"+inicialization.generations+"seed"+randomSeed;
             Float[] xValues = new Float[inicialization.population];
             Float[] yValues = new Float[inicialization.population];
             Float[] restriction1 = new Float[inicialization.population];
@@ -236,12 +243,12 @@ public class Inicialization {
             }
             System.out.println("Done");
             DataSaving.saveXYValues(fileName, xValues, yValues);
-            DataSaving.saveWXYZ(fileName+"withRestrictions", xValues, yValues, restriction1, restriction2);
+            //DataSaving.saveWXYZ(fileName+"withRestrictions", xValues, yValues, restriction1, restriction2);
         } else {
             System.out.println("ZDT3");
-            Inicialization inicialization = Inicialization.setup(gens, population, 30, 1/3f, 0.5f, 0.1f);
+            Inicialization inicialization = Inicialization.setup(gens, population, randomSeed, dimensions, (float)1/neighborhoodSize, 0.5f);
             inicialization.evolve(false);
-            String fileName = "ZDT3results-p"+inicialization.population+"g"+inicialization.generations;
+            String fileName = "ZDT3results-p"+inicialization.population+"g"+inicialization.generations+"seed"+randomSeed;
             Float[] xValues = new Float[inicialization.population];
             Float[] yValues = new Float[inicialization.population];
             for (int i = 0; i < inicialization.population; i++){
