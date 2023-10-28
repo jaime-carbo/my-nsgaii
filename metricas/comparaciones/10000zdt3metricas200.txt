@@ -1,0 +1,60 @@
+Front 1 hypervolume: 4.5363073518
+Front 1 spacing: 0.0156626259
+Front 2 hypervolume: 4.3937377950
+Front 2 spacing: 0.0038991716
+C(front2,front1)=0.0666666667
+C(front1,front2)=0.7384615385
+Front 1 hypervolume: 4.6210129743
+Front 1 spacing: 0.0155724991
+Front 2 hypervolume: 4.4787397314
+Front 2 spacing: 0.0036157422
+C(front2,front1)=0.0379746835
+C(front1,front2)=0.8282828283
+Front 1 hypervolume: 4.6134734501
+Front 1 spacing: 0.0240191566
+Front 2 hypervolume: 4.4530467764
+Front 2 spacing: 0.0040485076
+C(front2,front1)=0.0229885057
+C(front1,front2)=0.7525252525
+Front 1 hypervolume: 4.5203514630
+Front 1 spacing: 0.0233920212
+Front 2 hypervolume: 4.4172192101
+Front 2 spacing: 0.0042564569
+C(front2,front1)=0.0543478261
+C(front1,front2)=0.6734693878
+Front 1 hypervolume: 4.5622092444
+Front 1 spacing: 0.0566926072
+Front 2 hypervolume: 4.4384842091
+Front 2 spacing: 0.0044389229
+C(front2,front1)=0.0107526882
+C(front1,front2)=0.8172588832
+Front 1 hypervolume: 4.6182213556
+Front 1 spacing: 0.0217751598
+Front 2 hypervolume: 4.5540253005
+Front 2 spacing: 0.0032248761
+C(front2,front1)=0.1340206186
+C(front1,front2)=0.5255102041
+Front 1 hypervolume: 4.5415862406
+Front 1 spacing: 0.0080017034
+Front 2 hypervolume: 4.4389263335
+Front 2 spacing: 0.0052128951
+C(front2,front1)=0.0117647059
+C(front1,front2)=0.6377551020
+Front 1 hypervolume: 4.5808983446
+Front 1 spacing: 0.0103806959
+Front 2 hypervolume: 4.3949727726
+Front 2 spacing: 0.0044158182
+C(front2,front1)=0.0210526316
+C(front1,front2)=0.8172588832
+Front 1 hypervolume: 4.6300338884
+Front 1 spacing: 0.0138735564
+Front 2 hypervolume: 4.4624717774
+Front 2 spacing: 0.0040560592
+C(front2,front1)=0.0000000000
+C(front1,front2)=0.8163265306
+Front 1 hypervolume: 4.6207528749
+Front 1 spacing: 0.0332417497
+Front 2 hypervolume: 4.4748046465
+Front 2 spacing: 0.0038848633
+C(front2,front1)=0.0108695652
+C(front1,front2)=0.7474226804

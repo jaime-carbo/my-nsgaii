@@ -67,14 +67,14 @@ public class StatCalculation {
             stds[i] = (float) Math.sqrt(stds[i]/data.size());
         }
         String[] stats = new String[3];
-        stats[0] = "media-HV-mio = " + means[0]  + " | media-HV-NSGAII =" + means[2] + " // desv-estandar-mio = " + stds[0] + " | desv-estandar-NSGAII = " + stds[2];
-        stats[1] = "media-spacing-mio = " + means[1]  + " | media-spacing-NSGAII =" + means[3] + " // desv-estandar-mio = " + stds[1] + " | desv-estandar-NSGAII = " + stds[3];
+        stats[0] = "media-HV-mio = " + means[0]  + " | media-HV-NSGAII = " + means[2] + " // desv-estandar-mio = " + stds[0] + " | desv-estandar-NSGAII = " + stds[2];
+        stats[1] = "media-spacing-mio = " + means[1]  + " | media-spacing-NSGAII = " + means[3] + " // desv-estandar-mio = " + stds[1] + " | desv-estandar-NSGAII = " + stds[3];
         stats[2] = "media C(NSGAII,mio) " + means[4] + " | media-C(mio,NSGAII) " + means[5] + " // desv-estandar C(NSGAII,mio) " + stds[4] + " | desv-estandar C(mio,NSGAII) " + stds[5];
         return stats;
     }
 
     public static void main(String[] args) throws IOException{
-        List<Float[]> data = readLines("/home/jaime/Downloads/mias/CF64MISEVALS/EVAL4000/metricas100.txt");
+        List<Float[]> data = readLines("my-nsgaii/metricas/comparaciones/10000zdt3metricas200.txt" );
         //print out the data
         String[] res = getStats(data);
         for (int i = 0; i < res.length; i++){
